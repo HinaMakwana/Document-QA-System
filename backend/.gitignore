@@ -1,0 +1,50 @@
+# Django #
+*.log
+*.pot
+*.pyc
+__pycache__
+db.sqlite3
+media
+staticfiles
+
+# Backup files #
+*.bak
+dump.rdb
+
+# Python #
+*.py[cod]
+*$py.class
+
+# pyenv
+.python-version
+
+# celery
+celerybeat-schedule.*
+celery.logs
+
+# Environments
+ENV
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.env-docker
+.prod-env
+
+# mypy
+.mypy_cache/
+
+# Visual Studio Code #
+.vscode/*
+.history
+started
+
+# MacOS .DS_Store
+*.DS_Store
+celerybeat-schedule
+
+# Local media
+media/
