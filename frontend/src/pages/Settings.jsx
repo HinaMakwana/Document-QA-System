@@ -75,160 +75,156 @@ const Settings = () => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-10 animate-fade-in pb-20">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+    <div className="max-w-4xl mx-auto space-y-10 animate-fade-in pb-20">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-          <h1 className="text-4xl font-extrabold text-white tracking-tight mb-2">Control Center</h1>
-          <p className="text-slate-400 font-medium tracking-wide">Manage your neural identity, API protocols, and workspace security.</p>
+          <h1 className="text-4xl font-bold text-white tracking-tight mb-2">Settings</h1>
+          <p className="text-slate-400 font-medium tracking-tight">Manage your account preferences, API keys, and workspace security.</p>
         </div>
-        <div className="flex items-center space-x-3 bg-slate-900/50 backdrop-blur-xl border border-white/5 px-5 py-2.5 rounded-[2rem] shadow-xl group hover:border-primary-500/30 transition-all">
-          <div className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse shadow-[0_0_12px_rgba(34,197,94,0.4)]"></div>
-          <span className="text-[11px] font-black text-slate-300 uppercase tracking-[0.2em]">{user?.tier || 'Free'} Core Protocol</span>
+        <div className="flex items-center space-x-3 bg-slate-900/50 backdrop-blur-xl border border-white/5 px-4 py-2 rounded-2xl shadow-xl">
+          <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]"></div>
+          <span className="text-[11px] font-bold text-slate-300 uppercase tracking-widest">{user?.tier || 'Free'} Plan Active</span>
         </div>
       </div>
 
       {/* Profile Section */}
-      <section className="glass-panel p-10 rounded-[2.5rem] shadow-2xl relative overflow-hidden group">
-        <div className="absolute top-0 right-0 -m-8 w-48 h-48 bg-primary-600/5 rounded-full blur-[80px] pointer-events-none group-hover:bg-primary-600/10 transition-all duration-700"></div>
-        <div className="flex items-center space-x-5 mb-10">
-          <div className="w-14 h-14 bg-primary-600/10 text-primary-400 rounded-2xl flex items-center justify-center ring-1 ring-primary-500/20 shadow-inner">
-            <User size={28} />
+      <section className="glass-panel p-8 rounded-3xl shadow-xl relative overflow-hidden group">
+        <div className="flex items-center space-x-4 mb-8">
+          <div className="w-12 h-12 bg-primary-600/10 text-primary-400 rounded-xl flex items-center justify-center border border-primary-500/10">
+            <User size={24} />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-white tracking-tight">Profile Credentials</h2>
-            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em] mt-1">Identity Verification</p>
+            <h2 className="text-xl font-bold text-white tracking-tight">Account Profile</h2>
+            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">Your personal credentials</p>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-          <div className="space-y-3">
-            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em] flex items-center">
-                <Shield size={12} className="mr-2" /> Verified Email
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="space-y-2.5">
+            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center">
+                <Shield size={12} className="mr-2" /> Registered Email
             </label>
-            <div className="text-slate-200 glass-input px-5 py-4 rounded-2xl font-bold tracking-tight text-lg shadow-sm">
+            <div className="text-slate-200 glass-input px-5 h-12 flex items-center rounded-xl font-bold tracking-tight text-sm">
                 {user?.email}
             </div>
           </div>
-          <div className="space-y-3">
-            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em] flex items-center">
-                <Zap size={12} className="mr-2" /> Active Plan
+          <div className="space-y-2.5">
+            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center">
+                <Zap size={12} className="mr-2" /> Current Plan
             </label>
-            <div className="flex items-center px-5 py-4 rounded-2xl glass-input shadow-sm">
-              <div className="w-8 h-8 rounded-lg bg-amber-400/10 flex items-center justify-center mr-4">
-                <Zap size={18} className="text-amber-400" />
+            <div className="flex items-center px-5 h-12 rounded-xl glass-input">
+              <div className="w-6 h-6 rounded-lg bg-primary-500/10 flex items-center justify-center mr-3">
+                <Zap size={14} className="text-primary-400" />
               </div>
-              <span className="text-slate-200 capitalize font-bold text-lg tracking-tight">{user?.tier || 'Free'} Subscription</span>
+              <span className="text-slate-200 capitalize font-bold text-sm tracking-tight">{user?.tier || 'Free'} Subscription</span>
             </div>
           </div>
         </div>
       </section>
 
       {/* API Keys Section */}
-      <section className="glass-panel p-10 rounded-[2.5rem] shadow-2xl relative group">
-        <div className="absolute bottom-0 left-0 -m-8 w-64 h-64 bg-indigo-600/5 rounded-full blur-[100px] pointer-events-none group-hover:bg-indigo-600/10 transition-all duration-700"></div>
-        <div className="flex items-center justify-between mb-10">
-          <div className="flex items-center space-x-5">
-            <div className="w-14 h-14 bg-indigo-600/10 text-indigo-400 rounded-2xl flex items-center justify-center ring-1 ring-indigo-500/20">
-              <Key size={28} />
+      <section className="glass-panel p-8 rounded-3xl shadow-xl relative group">
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center space-x-4">
+            <div className="w-12 h-12 bg-primary-600/10 text-primary-400 rounded-xl flex items-center justify-center border border-primary-500/10">
+              <Key size={24} />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-white tracking-tight">API Protocols</h2>
-              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em] mt-1">Machine Integration Interface</p>
+              <h2 className="text-xl font-bold text-white tracking-tight">API Access Keys</h2>
+              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">Interface for programmatic access</p>
             </div>
           </div>
         </div>
 
         {createdKey && (
-          <div className="mb-10 p-8 glass-panel border-primary-500/30 rounded-[2rem] shadow-2xl shadow-primary-500/10 animate-slide-up bg-slate-900/40 relative">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-sm font-bold text-primary-400 flex items-center uppercase tracking-widest">
-                <AlertCircle size={18} className="mr-2" />
-                Critical: Token Generated
+          <div className="mb-8 p-6 glass-panel border-primary-500/30 rounded-2xl shadow-xl animate-scale-in bg-slate-950/40">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xs font-bold text-primary-400 flex items-center uppercase tracking-widest">
+                <AlertCircle size={16} className="mr-2" />
+                Key Generated Successfully
               </h3>
               <button
                 onClick={() => setCreatedKey(null)}
-                className="p-2 text-slate-500 hover:text-white transition-colors"
+                className="p-1.5 text-slate-500 hover:text-white transition-colors"
               >
-                <Plus size={20} className="rotate-45" />
+                <Plus size={18} className="rotate-45" />
               </button>
             </div>
-            <p className="text-xs text-slate-400 mb-6 font-medium leading-relaxed">
-              This token grants full programmatic access to your document library. Store it securely; it will not be displayed again.
+            <p className="text-[11px] text-slate-500 mb-5 font-medium leading-relaxed">
+              Make sure to copy your API key now. You won't be able to see it again for security reasons.
             </p>
-            <div className="flex items-center space-x-3">
-              <code className="flex-1 glass-input p-4 rounded-xl text-primary-300 font-mono text-sm break-all font-bold tracking-wider">
+            <div className="flex items-center space-x-2">
+              <code className="flex-1 glass-input px-4 py-3 rounded-xl text-primary-300 font-mono text-sm break-all font-bold tracking-tight">
                 {createdKey.key}
               </code>
               <button
                 onClick={() => copyToClipboard(createdKey.key)}
-                className={`flex-shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${
-                    copied ? 'bg-green-600 text-white' : 'bg-primary-600 hover:bg-primary-500 text-white shadow-xl shadow-primary-600/30 hover:scale-105 active:scale-95'
+                className={`flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center transition-all ${
+                    copied ? 'bg-green-600 text-white' : 'bg-primary-600 hover:bg-primary-500 text-white shadow-lg active:scale-95'
                 }`}
               >
-                {copied ? <Check size={24} /> : <Copy size={24} />}
+                {copied ? <Check size={20} /> : <Copy size={20} />}
               </button>
             </div>
           </div>
         )}
 
-        <form onSubmit={handleCreateKey} className="flex gap-4 mb-12">
+        <form onSubmit={handleCreateKey} className="flex gap-3 mb-10">
           <input
             type="text"
             value={newKeyName}
             onChange={(e) => setNewKeyName(e.target.value)}
-            placeholder="Protocol Identification (e.g. Pipeline-Alpha)"
-            className="flex-1 glass-input rounded-2xl px-6 py-4 text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-primary-500/30 transition-all font-bold"
+            placeholder="Key Name (e.g. My Website)"
+            className="flex-1 glass-input rounded-xl px-5 h-12 text-sm text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-primary-500/30 transition-all font-bold"
             required
           />
           <button
             type="submit"
             disabled={creating}
-            className="w-48 h-14 rounded-2xl flex items-center justify-center bg-primary-600 hover:bg-primary-500 text-white font-black uppercase tracking-[0.2em] text-xs transition-all shadow-xl shadow-primary-600/20 active:scale-95 disabled:opacity-50"
+            className="px-6 h-12 rounded-xl flex items-center justify-center bg-primary-600 hover:bg-primary-500 text-white font-bold uppercase tracking-wider text-[11px] transition-all shadow-lg active:scale-95 disabled:opacity-50"
           >
-            {creating ? <Loader2 size={24} className="animate-spin" /> : <Plus size={24} className="mr-2" />}
-             New Key
+            {creating ? <Loader2 size={18} className="animate-spin" /> : <Plus size={18} className="mr-2" />}
+             Create Key
           </button>
         </form>
 
-        <div className="space-y-4">
-          <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.4em] pl-2 mb-4">Authorized Protocols</h3>
+        <div className="space-y-3">
+          <h3 className="text-[10px] font-bold text-slate-600 uppercase tracking-widest pl-1 mb-3">Active API Keys</h3>
           {loading ? (
-             <div className="py-20 flex flex-col items-center justify-center">
-                <Loader2 size={32} className="text-primary-600 animate-spin mb-4" />
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Validating Keychains...</p>
+             <div className="py-12 flex flex-col items-center justify-center">
+                <Loader2 size={24} className="text-primary-600 animate-spin mb-3" />
+                <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">Loading keys...</p>
              </div>
           ) : apiKeys.length === 0 ? (
-            <div className="py-20 text-center glass-panel rounded-3xl border border-dashed border-slate-800/50">
-               <p className="text-slate-600 font-bold uppercase text-[10px] tracking-widest px-10 leading-relaxed">No protocols have been registered for external access.</p>
+            <div className="py-12 text-center glass-panel rounded-2xl border-dashed border-slate-800">
+               <p className="text-slate-600 font-bold uppercase text-[9px] tracking-widest">No API keys generated yet.</p>
             </div>
           ) : (
             apiKeys.map(apiKey => (
-              <div key={apiKey.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-6 glass-input rounded-3xl hover:bg-white/5 transition-all group border-white/5 gap-4">
-                <div className="flex items-center space-x-6">
-                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${
-                      apiKey.is_active ? 'bg-indigo-600/10 text-indigo-400' : 'bg-slate-800 text-slate-600 opacity-50'
+              <div key={apiKey.id} className="flex items-center justify-between p-4 glass-input rounded-2xl border-white/5 transition-all group">
+                <div className="flex items-center space-x-4">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
+                      apiKey.is_active ? 'bg-primary-600/10 text-primary-400 border border-primary-500/10' : 'bg-slate-800 text-slate-600'
                   }`}>
-                    <Shield size={24} />
+                    <Key size={18} />
                   </div>
                   <div>
-                    <h4 className="text-base font-bold text-white tracking-tight">{apiKey.name}</h4>
-                    <div className="flex items-center mt-1 space-x-3">
-                        <code className="text-xs text-slate-500 font-bold font-mono tracking-widest">{apiKey.key_prefix}••••••••</code>
-                        <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest px-2 py-0.5 rounded-lg border border-slate-800">
-                            {format(new Date(apiKey.created_at), 'MMM d, yyyy')}
+                    <h4 className="text-sm font-bold text-white tracking-tight">{apiKey.name}</h4>
+                    <div className="flex items-center mt-0.5 space-x-2">
+                        <code className="text-[10px] text-slate-600 font-bold font-mono tracking-widest">{apiKey.key_prefix}••••••••</code>
+                        <span className="text-[9px] font-bold text-slate-600 uppercase tracking-tight">
+                            Created {format(new Date(apiKey.created_at), 'MM/dd/yy')}
                         </span>
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center justify-end space-x-4">
-                  <button
-                    onClick={() => handleRevokeKey(apiKey.id)}
-                    className="w-12 h-12 flex items-center justify-center text-slate-500 hover:text-red-400 hover:bg-red-400/10 rounded-xl transition-all border border-transparent hover:border-red-400/30 group/btn"
-                    title="Terminate Protocol"
-                  >
-                    <Trash2 size={20} />
-                  </button>
-                </div>
+                <button
+                  onClick={() => handleRevokeKey(apiKey.id)}
+                  className="w-10 h-10 flex items-center justify-center text-slate-600 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all"
+                  title="Revoke Key"
+                >
+                  <Trash2 size={16} />
+                </button>
               </div>
             ))
           )}
@@ -236,24 +232,24 @@ const Settings = () => {
       </section>
 
       {/* Danger Zone */}
-      <section className="p-10 rounded-[2.5rem] border border-red-900/30 bg-red-950/5 relative overflow-hidden group">
-        <div className="absolute top-0 right-0 -m-8 w-48 h-48 bg-red-500/5 rounded-full blur-[80px] pointer-events-none group-hover:bg-red-500/10 transition-all"></div>
-        <h2 className="text-xl font-bold text-red-500 mb-6 flex items-center">
-          <AlertCircle size={24} className="mr-3" />
-          Neural Wipe (Danger Zone)
+      <section className="p-8 rounded-3xl border border-red-900/30 bg-red-950/5 relative overflow-hidden group">
+        <h2 className="text-lg font-bold text-red-500 mb-6 flex items-center uppercase tracking-wider">
+          <AlertCircle size={20} className="mr-2" />
+          Security Zone
         </h2>
-        <div className="flex flex-col sm:flex-row items-center justify-between p-8 glass-panel border-red-900/20 rounded-[2rem] gap-6">
-          <div className="max-w-md text-center sm:text-left">
-            <h4 className="text-lg font-bold text-white mb-1">Permanently Delete Account</h4>
-            <p className="text-xs text-slate-500 font-medium leading-relaxed">This will erase all processed documents, vector embeddings, and conversation history. This action is irreversible.</p>
+        <div className="flex flex-col sm:flex-row items-center justify-between p-6 glass-panel border-red-900/10 rounded-2xl gap-6">
+          <div className="text-center sm:text-left">
+            <h4 className="text-base font-bold text-white mb-1">Delete Account</h4>
+            <p className="text-[11px] text-slate-500 font-medium leading-relaxed">Permanently erase your account, documents, and chat history. This action cannot be undone.</p>
           </div>
-          <button className="h-12 px-6 border border-red-900 shadow-xl shadow-red-950/50 text-red-500 hover:bg-red-500 hover:text-white rounded-xl text-xs font-black uppercase tracking-[0.2em] transition-all whitespace-nowrap active:scale-95">
-            Execute Neural Wipe
+          <button className="h-11 px-6 border border-red-900 shadow-xl text-red-500 hover:bg-red-500 hover:text-white rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all active:scale-95">
+            Delete Profile
           </button>
         </div>
       </section>
     </div>
   );
 };
+
 
 export default Settings;

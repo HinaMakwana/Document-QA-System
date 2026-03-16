@@ -1,13 +1,13 @@
 @import "tailwindcss";
 
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
   color-scheme: dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #0f172a;
+  color: rgba(255, 255, 255, 0.9);
+  background-color: #020617;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -28,14 +28,14 @@ body {
 
 @layer base {
   body {
-    @apply bg-slate-950 text-slate-200;
+    @apply bg-slate-950 text-slate-200 selection:bg-primary-500/30;
   }
 }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -43,53 +43,58 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(100, 116, 139, 0.2);
-  border-radius: 20px;
+  background: rgba(148, 163, 184, 0.1);
+  border-radius: 100px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(139, 92, 246, 0.4);
+  background: rgba(139, 92, 246, 0.3);
 }
 
-/* Premium Panel Classes */
+/* Refined Glassmorphism */
 .glass-panel {
-  background: rgba(15, 23, 42, 0.6);
-  backdrop-filter: blur(12px) saturate(150%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.glass-card {
-  background: linear-gradient(135deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.7) 100%);
-  backdrop-filter: blur(10px);
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.glass-input {
-  background: rgba(2, 6, 23, 0.3);
+.glass-card {
+  background: rgba(30, 41, 59, 0.3);
   backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.03);
 }
 
-.glass-dark {
-  background: rgba(15, 23, 42, 0.65);
-  backdrop-filter: blur(16px);
+.glass-input {
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+.glass-nav {
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
 .gradient-text {
-  @apply bg-clip-text text-transparent bg-gradient-to-br from-white via-slate-200 to-slate-400 font-bold;
+  @apply bg-clip-text text-transparent bg-gradient-to-br from-white via-slate-100 to-slate-400 font-bold;
+}
+
+/* Transitions */
+.page-transition {
+  @apply transition-all duration-300 ease-out;
 }
 
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-12px); }
+  50% { transform: translateY(-8px); }
 }
 
 .animate-float {
-  animation: float 6s ease-in-out infinite;
+  animation: float 5s ease-in-out infinite;
 }
 
-/* Custom Primary Colors for v4 if config is not picked up */
+/* Custom Primary Colors for v4 Theme */
 @theme {
   --color-primary-50: #f5f3ff;
   --color-primary-100: #ede9fe;
@@ -102,4 +107,8 @@ body {
   --color-primary-800: #5b21b6;
   --color-primary-900: #4c1d95;
   --color-primary-950: #2e1065;
+  
+  --radius-4xl: 2rem;
+  --radius-5xl: 3rem;
 }
+

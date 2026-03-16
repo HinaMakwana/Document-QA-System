@@ -41,7 +41,7 @@ const Dashboard = () => {
     if (loading) {
         return (
             <div className="flex-1 flex items-center justify-center min-h-[400px]">
-                <Loader2 className="w-10 h-10 text-primary-600 animate-spin" />
+                <Loader2 className="w-8 h-8 text-primary-600 animate-spin" />
             </div>
         );
     }
@@ -57,186 +57,179 @@ const Dashboard = () => {
     const docProgress = getPercentage(usage?.documents?.count, usage?.documents?.limit);
 
     return (
-        <div className="max-w-7xl mx-auto space-y-12 animate-fade-in pb-20">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
+        <div className="max-w-6xl mx-auto space-y-10 animate-fade-in pb-20">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
-                    <h1 className="text-4xl lg:text-5xl font-extrabold text-white tracking-tight mb-2">Command Center</h1>
-                    <p className="text-slate-400 font-medium tracking-wide">Telemetric analysis of neural consumption and document intelligence throughput.</p>
+                    <h1 className="text-4xl font-bold text-white tracking-tight mb-2">Usage Dashboard</h1>
+                    <p className="text-slate-400 font-medium tracking-tight">Monitor your resource consumption and document intelligence throughput.</p>
                 </div>
-                <div className="flex items-center space-x-4 bg-slate-900/40 backdrop-blur-3xl border border-white/5 py-3 px-6 rounded-[2.5rem] shadow-2xl group hover:border-primary-500/20 transition-all">
-                    <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse shadow-[0_0_15px_rgba(34,197,94,0.5)]"></div>
+                <div className="flex items-center space-x-3 bg-slate-900/40 backdrop-blur-3xl border border-white/5 py-2.5 px-5 rounded-2xl shadow-xl">
+                    <div className="w-2.5 h-2.5 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.4)]"></div>
                     <div className="flex flex-col">
-                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">System Health</span>
-                        <span className="text-[11px] font-black text-slate-200 uppercase tracking-[0.1em]">{usage?.tier || 'Standard'} Protocol Active</span>
+                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-none">System Status</span>
+                        <span className="text-[11px] font-bold text-slate-200 uppercase tracking-tight mt-0.5">{usage?.tier || 'Free'} Plan Active</span>
                     </div>
                 </div>
             </div>
 
-            {/* Premium Stats Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+            {/* Stats Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {[
-                    { label: 'Neural Tokens', value: totals.tokens, icon: Zap, color: 'primary', suffix: 'Units' },
-                    { label: 'Active Missions', value: usage?.conversations?.count, icon: MessageSquare, color: 'green', suffix: 'Threads' },
-                    { label: 'Knowledge Base', value: usage?.documents?.count, icon: FileText, color: 'indigo', suffix: 'Docs' },
-                    { label: 'Latency', value: totals.avg_response_time_ms, icon: Activity, color: 'yellow', suffix: 'ms' }
+                    { label: 'Total Tokens', value: totals.tokens, icon: Zap, color: 'primary', suffix: 'Tokens' },
+                    { label: 'Active Chats', value: usage?.conversations?.count, icon: MessageSquare, color: 'indigo', suffix: 'Threads' },
+                    { label: 'Storage', value: usage?.documents?.count, icon: FileText, color: 'purple', suffix: 'Files' },
+                    { label: 'Avg Latency', value: totals.avg_response_time_ms, icon: Activity, color: 'emerald', suffix: 'ms' }
                 ].map((stat, i) => (
-                    <div key={i} className="glass-panel p-8 rounded-[2.5rem] relative overflow-hidden group hover:scale-[1.03] transition-all duration-500 shadow-2xl">
-                        <div className={`absolute -right-8 -top-8 w-32 h-32 bg-${stat.color}-600/5 rounded-full blur-[60px] group-hover:bg-${stat.color}-600/10 transition-all duration-700`}></div>
-                        <div className={`w-14 h-14 bg-${stat.color}-600/10 text-${stat.color}-400 rounded-2xl flex items-center justify-center mb-6 ring-1 ring-${stat.color}-500/20 shadow-inner group-hover:rotate-6 transition-all`}>
-                            <stat.icon size={28} />
+                    <div key={i} className="glass-panel p-6 rounded-3xl relative overflow-hidden group hover:bg-white/[0.02] transition-all duration-300">
+                        <div className={`w-12 h-12 bg-primary-600/10 text-primary-400 rounded-xl flex items-center justify-center mb-5 border border-primary-500/10 group-hover:scale-110 transition-transform`}>
+                            <stat.icon size={22} />
                         </div>
-                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em] mb-1">{stat.label}</p>
-                        <div className="flex items-baseline space-x-2">
-                            <h3 className="text-3xl font-black text-white tracking-tighter italic">{(stat.value || 0).toLocaleString()}</h3>
-                            <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">{stat.suffix}</span>
+                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">{stat.label}</p>
+                        <div className="flex items-baseline space-x-1.5">
+                            <h3 className="text-2xl font-bold text-white tracking-tight">{(stat.value || 0).toLocaleString()}</h3>
+                            <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">{stat.suffix}</span>
                         </div>
                     </div>
                 ))}
             </div>
 
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-10">
-                {/* Quotas Section */}
-                <div className="xl:col-span-1 space-y-8">
-                    <h2 className="text-2xl font-black text-white uppercase tracking-tighter flex items-center italic">
-                        <Activity size={24} className="mr-3 text-primary-500" />
-                        Operation Quotas
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+                {/* Quotas */}
+                <div className="xl:col-span-1 space-y-6">
+                    <h2 className="text-xl font-bold text-white tracking-tight flex items-center">
+                        <Activity size={20} className="mr-2.5 text-primary-500" />
+                        Resource Quotas
                     </h2>
 
-                    <div className="glass-panel p-10 rounded-[2.5rem] shadow-2xl relative overflow-hidden">
-                        <div className="absolute top-0 right-0 -m-10 w-48 h-48 bg-primary-600/5 rounded-full blur-[80px]"></div>
-
+                    <div className="glass-panel p-8 rounded-3xl shadow-xl relative overflow-hidden">
                         <div className="space-y-10 relative">
                             {/* Token Progress */}
-                            <div className="space-y-5">
+                            <div className="space-y-4">
                                 <div className="flex justify-between items-end">
-                                    <div>
-                                        <p className="text-base font-bold text-white tracking-tight">Synapse Throughput</p>
-                                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.1em]">Daily token allocation</p>
+                                    <div className="min-w-0">
+                                        <p className="text-sm font-bold text-white tracking-tight">Daily Allowance</p>
+                                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Token limits per 24h</p>
                                     </div>
-                                    <div className="text-right">
-                                        <span className="text-2xl font-black text-white italic">{tokenProgress}%</span>
-                                    </div>
+                                    <span className="text-xl font-bold text-white">{tokenProgress}%</span>
                                 </div>
-                                <div className="h-3 w-full bg-slate-900/50 rounded-full overflow-hidden ring-1 ring-white/5 p-0.5">
+                                <div className="h-2 w-full bg-slate-900 rounded-full overflow-hidden p-0.5">
                                     <div
-                                        className={`h-full rounded-full transition-all duration-1000 shadow-[0_0_15px_rgba(37,99,235,0.3)] ${
+                                        className={`h-full rounded-full transition-all duration-1000 ${
                                             tokenProgress > 90 ? 'bg-red-500' : tokenProgress > 70 ? 'bg-yellow-500' : 'bg-primary-600'
                                         }`}
                                         style={{ width: `${tokenProgress}%` }}
                                     ></div>
                                 </div>
-                                <div className="flex justify-between text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">
-                                    <span>{usage?.token_usage?.today?.used.toLocaleString()} Loaded</span>
+                                <div className="flex justify-between text-[10px] font-bold text-slate-600 uppercase tracking-wider">
+                                    <span>{usage?.token_usage?.today?.used.toLocaleString()} Used</span>
                                     <span>{usage?.token_usage?.today?.limit.toLocaleString()} Max</span>
                                 </div>
                             </div>
 
                             {/* Document Progress */}
-                            <div className="space-y-5">
+                            <div className="space-y-4">
                                 <div className="flex justify-between items-end">
-                                    <div>
-                                        <p className="text-base font-bold text-white tracking-tight">Memory Expansion</p>
-                                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.1em]">Total document indexing</p>
+                                    <div className="min-w-0">
+                                        <p className="text-sm font-bold text-white tracking-tight">Document Storage</p>
+                                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Total capacity limit</p>
                                     </div>
-                                    <div className="text-right">
-                                        <span className="text-2xl font-black text-white italic">{docProgress}%</span>
-                                    </div>
+                                    <span className="text-xl font-bold text-white">{docProgress}%</span>
                                 </div>
-                                <div className="h-3 w-full bg-slate-900/50 rounded-full overflow-hidden ring-1 ring-white/5 p-0.5">
+                                <div className="h-2 w-full bg-slate-900 rounded-full overflow-hidden p-0.5">
                                     <div
-                                        className="h-full bg-indigo-500 rounded-full transition-all duration-1000 shadow-[0_0_15px_rgba(99,102,241,0.3)]"
+                                        className="h-full bg-primary-500 rounded-full transition-all duration-1000"
                                         style={{ width: `${docProgress}%` }}
                                     ></div>
                                 </div>
-                                <div className="flex justify-between text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">
+                                <div className="flex justify-between text-[10px] font-bold text-slate-600 uppercase tracking-wider">
                                     <span>{usage?.documents?.count} Indexed</span>
-                                    <span>{usage?.documents?.limit} Capacity</span>
+                                    <span>{usage?.documents?.limit} Limit</span>
                                 </div>
                             </div>
 
-                            <div className="pt-8 border-t border-white/5">
-                                <div className="flex items-center text-[10px] text-slate-600 font-bold uppercase tracking-widest">
-                                    <AlertCircle size={14} className="mr-3 text-slate-700" />
-                                    Chronological reset: 00:00 UTC
+                            <div className="pt-6 border-t border-white/5">
+                                <div className="flex items-center text-[10px] text-slate-600 font-bold uppercase tracking-wider italic">
+                                    <Clock size={14} className="mr-2 text-slate-700" />
+                                    Resets daily at 00:00 UTC
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Event Breakdown */}
-                <div className="xl:col-span-2 space-y-8">
-                    <h2 className="text-2xl font-black text-white uppercase tracking-tighter flex items-center italic">
-                        <TrendingUp size={24} className="mr-3 text-primary-500" />
-                        Neural Activity
+                {/* Activity Breakdown */}
+                <div className="xl:col-span-2 space-y-6">
+                    <h2 className="text-xl font-bold text-white tracking-tight flex items-center">
+                        <TrendingUp size={20} className="mr-2.5 text-primary-500" />
+                        Activity Logs
                     </h2>
 
-                    <div className="glass-panel rounded-[2.5rem] shadow-2xl overflow-hidden border-white/5 bg-slate-900/20 backdrop-blur-3xl p-2">
-                        <table className="w-full text-left">
-                            <thead>
-                                <tr className="border-b border-white/5 bg-slate-900/40">
-                                    <th className="px-10 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.4em]">Protocol</th>
-                                    <th className="px-10 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.4em]">Exec Cache</th>
-                                    <th className="px-10 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.4em]">Synapse Load</th>
-                                    <th className="px-10 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] text-right">System Weight</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-white/5">
-                                {by_event_type.length === 0 ? (
-                                    <tr>
-                                        <td colSpan="4" className="px-10 py-24 text-center">
-                                            <div className="flex flex-col items-center">
-                                                <Activity size={48} className="text-slate-900 mb-6" />
-                                                <p className="text-[10px] font-bold text-slate-600 uppercase tracking-[0.3em] italic">No telemetry data recorded in current temporal window.</p>
-                                            </div>
-                                        </td>
+                    <div className="glass-panel rounded-3xl shadow-xl overflow-hidden border-white/5 bg-slate-900/20">
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left">
+                                <thead>
+                                    <tr className="border-b border-white/5 bg-slate-900/40">
+                                        <th className="px-8 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Activity Type</th>
+                                        <th className="px-8 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest text-center">Frequency</th>
+                                        <th className="px-8 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest text-center">Energy Cost</th>
+                                        <th className="px-8 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest text-right">Weight</th>
                                     </tr>
-                                ) : (
-                                    by_event_type.map((item, idx) => (
-                                        <tr key={idx} className="hover:bg-white/[0.02] transition-colors group">
-                                            <td className="px-10 py-7">
-                                                <div className="flex items-center space-x-6">
-                                                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all shadow-inner ${
-                                                        item.event_type === 'chat' ? 'bg-primary-600/10 text-primary-400 border border-primary-500/20' :
-                                                        item.event_type === 'upload' ? 'bg-indigo-600/10 text-indigo-400 border border-indigo-500/20' :
-                                                        'bg-slate-700/10 text-slate-500 border border-slate-600/20'
-                                                    }`}>
-                                                        {item.event_type === 'chat' ? <MessageSquare size={20} /> :
-                                                         item.event_type === 'upload' ? <FileText size={20} /> : <TrendingUp size={20} />}
-                                                    </div>
-                                                    <span className="text-base font-bold text-white tracking-tight capitalize">{item.event_type}</span>
-                                                </div>
-                                            </td>
-                                            <td className="px-10 py-7 text-sm font-bold text-slate-400 tracking-wider whitespace-nowrap">{item.count} Actions</td>
-                                            <td className="px-10 py-7 text-sm font-bold text-slate-400 tracking-wider">{(item.tokens || 0).toLocaleString()} Syn</td>
-                                            <td className="px-10 py-7 text-right">
-                                                <div className="inline-flex items-center px-4 py-2 rounded-xl glass-input text-[10px] font-black text-primary-400 uppercase tracking-widest border-primary-500/10">
-                                                    {Math.round((item.tokens / (totals.tokens || 1)) * 100)}% Load
+                                </thead>
+                                <tbody className="divide-y divide-white/5">
+                                    {by_event_type.length === 0 ? (
+                                        <tr>
+                                            <td colSpan="4" className="px-8 py-20 text-center">
+                                                <div className="flex flex-col items-center opacity-30">
+                                                    <Activity size={40} className="text-slate-500 mb-4" />
+                                                    <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest italic">No activity logs recorded recently.</p>
                                                 </div>
                                             </td>
                                         </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
+                                    ) : (
+                                        by_event_type.map((item, idx) => (
+                                            <tr key={idx} className="hover:bg-white/[0.02] transition-colors group">
+                                                <td className="px-8 py-6">
+                                                    <div className="flex items-center space-x-4">
+                                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${
+                                                            item.event_type === 'chat' ? 'bg-primary-600/10 text-primary-400 border-primary-500/10' :
+                                                            'bg-slate-700/10 text-slate-500 border-slate-600/10'
+                                                        }`}>
+                                                            {item.event_type === 'chat' ? <MessageSquare size={16} /> : <FileText size={16} />}
+                                                        </div>
+                                                        <span className="text-sm font-bold text-white tracking-tight capitalize">{item.event_type}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-8 py-6 text-sm font-bold text-slate-400 text-center">{item.count} ops</td>
+                                                <td className="px-8 py-6 text-sm font-bold text-slate-400 text-center font-mono">{(item.tokens || 0).toLocaleString()} tks</td>
+                                                <td className="px-8 py-6 text-right">
+                                                    <div className="inline-flex items-center px-3 py-1.5 rounded-lg bg-white/5 border border-white/5 text-[9px] font-bold text-primary-400 uppercase tracking-widest">
+                                                        {Math.round((item.tokens / (totals.tokens || 1)) * 100)}% Usage
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            {/* Premium Placeholder */}
-            <div className="glass-panel p-12 rounded-[3rem] border border-white/5 flex flex-col lg:flex-row items-center justify-between gap-12 relative overflow-hidden group">
-                <div className="absolute inset-0 bg-gradient-to-r from-primary-600/5 to-transparent pointer-events-none"></div>
+            {/* Premium Section */}
+            <div className="glass-panel p-10 rounded-3xl border border-white/5 flex flex-col lg:flex-row items-center justify-between gap-10 relative overflow-hidden group">
+                <div className="absolute inset-0 bg-gradient-to-r from-primary-600/10 to-transparent pointer-events-none"></div>
                 <div className="max-w-2xl relative z-10 text-center lg:text-left">
-                    <h3 className="text-3xl font-black text-white mb-4 tracking-tighter italic">Advanced Projection Charts</h3>
-                    <p className="text-slate-400 text-lg font-medium leading-relaxed">
-                        We are calibrating multidimensional time-series visualizations.
-                        Soon, you'll be able to trace every neuron's journey through your document library.
+                    <h3 className="text-2xl font-bold text-white mb-3 tracking-tight italic uppercase tracking-wider">Historical Analytics</h3>
+                    <p className="text-slate-400 text-base font-medium leading-relaxed">
+                        We are currently building advanced time-series visualizations. 
+                        Soon, you'll be able to track your document processing trends and resource optimization in real-time.
                     </p>
                 </div>
-                <div className="flex -space-x-8 opacity-20 grayscale scale-125 lg:scale-150 pointer-events-none group-hover:opacity-40 transition-all duration-1000">
-                    {[1, 2, 3, 4, 5, 6].map(i => (
-                        <div key={i} className="w-16 h-32 bg-primary-600 rounded-2xl flex items-end p-2 border border-white/10 shadow-2xl">
-                            <div className="w-full bg-white/40 rounded-t-xl" style={{ height: `${i * 15}%` }}></div>
+                <div className="flex space-x-4 opacity-10 group-hover:opacity-20 transition-all duration-1000 scale-110">
+                    {[3, 5, 2, 8, 4, 9].map((val, i) => (
+                        <div key={i} className="w-12 h-24 bg-primary-600/30 rounded-xl flex items-end p-1.5 border border-white/10">
+                            <div className="w-full bg-primary-500 rounded-lg" style={{ height: `${val * 10}%` }}></div>
                         </div>
                     ))}
                 </div>
@@ -244,5 +237,6 @@ const Dashboard = () => {
         </div>
     );
 };
+
 
 export default Dashboard;

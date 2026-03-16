@@ -62,7 +62,7 @@ const Documents = () => {
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm("Are you sure? This will remove all embeddings too.")) return;
+        if (!window.confirm("Are you sure? This will remove all processed data too.")) return;
         try {
             await documentApi.delete(id);
             setDocuments(prev => prev.filter(doc => doc.id !== id));
@@ -89,14 +89,14 @@ const Documents = () => {
             pending: 'bg-slate-500/10 text-slate-500 border-slate-500/20'
         };
         const icons = {
-            completed: <CheckCircle size={12} className="mr-1" />,
-            processing: <Loader2 size={12} className="mr-1 animate-spin" />,
-            failed: <AlertCircle size={12} className="mr-1" />,
-            pending: <Clock size={12} className="mr-1" />
+            completed: <CheckCircle size={12} className="mr-1.5" />,
+            processing: <Loader2 size={12} className="mr-1.5 animate-spin" />,
+            failed: <AlertCircle size={12} className="mr-1.5" />,
+            pending: <Clock size={12} className="mr-1.5" />
         };
 
         return (
-            <div className={`inline-flex items-center px-2 py-0.5 rounded-full border text-[10px] font-bold uppercase tracking-wider ${styles[status] || styles.pending}`}>
+            <div className={`inline-flex items-center px-2.5 py-1 rounded-lg border text-[10px] font-bold uppercase tracking-wider ${styles[status] || styles.pending}`}>
                 {icons[status]}
                 {status}
             </div>
@@ -108,99 +108,97 @@ const Documents = () => {
     );
 
     return (
-        <div className="max-w-7xl mx-auto space-y-10 md:space-y-12 animate-fade-in pb-20">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
+        <div className="max-w-6xl mx-auto space-y-8 animate-fade-in pb-20">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div>
-                    <h1 className="text-4xl lg:text-5xl font-extrabold text-white tracking-tight mb-2">Knowledge Bank</h1>
-                    <p className="text-slate-400 font-medium tracking-wide">Orchestrate and calibrate your document vector space.</p>
+                    <h1 className="text-4xl font-bold text-white tracking-tight mb-2">Knowledge Base</h1>
+                    <p className="text-slate-400 font-medium tracking-tight">Manage and organize your documents for contextual analysis.</p>
                 </div>
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                     <div className="relative flex-1 sm:flex-none">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
                         <input
                             type="text"
-                            placeholder="Identify protocol..."
+                            placeholder="Search documents..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="glass-input pl-12 pr-6 py-4 rounded-2xl outline-none focus:ring-2 focus:ring-primary-500/30 transition-all w-full sm:w-80 text-white font-bold tracking-tight"
+                            className="glass-input pl-10 pr-6 h-12 rounded-xl outline-none focus:ring-1 focus:ring-primary-500/30 transition-all w-full sm:w-64 text-sm text-white font-medium placeholder-slate-600"
                         />
                     </div>
-                    <label className={`h-14 px-8 rounded-2xl flex items-center justify-center cursor-pointer transition-all shadow-2xl ${
-                        uploading ? 'bg-slate-800 text-slate-500 cursor-not-allowed' : 'bg-primary-600 hover:bg-primary-500 text-white shadow-primary-600/30 hover:scale-105 active:scale-95'
+                    <label className={`h-12 px-6 rounded-xl flex items-center justify-center cursor-pointer transition-all ${
+                        uploading ? 'bg-slate-800 text-slate-500 cursor-not-allowed' : 'bg-primary-600 hover:bg-primary-500 text-white shadow-lg shadow-primary-600/20 active:scale-95'
                     }`}>
-                        {uploading ? <Loader2 className="animate-spin mr-3" size={20} /> : <Upload className="mr-3" size={20} />}
-                        <span className="font-black text-xs uppercase tracking-[0.2em]">{uploading ? 'Syncing...' : 'Upload Data'}</span>
+                        {uploading ? <Loader2 className="animate-spin mr-2" size={18} /> : <Upload className="mr-2" size={18} />}
+                        <span className="font-bold text-xs uppercase tracking-wider">{uploading ? 'Uploading...' : 'Upload Files'}</span>
                         <input type="file" className="hidden" multiple accept=".pdf,.docx,.doc,.txt" onChange={handleUpload} disabled={uploading} />
                     </label>
                 </div>
             </div>
 
-            {/* Content Area */}
             {loading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {[1, 2, 3].map(i => (
-                        <div key={i} className="glass-panel p-8 rounded-[2.5rem] animate-pulse h-56 border-white/5"></div>
+                        <div key={i} className="glass-panel p-6 rounded-3xl animate-pulse h-48 border-white/5"></div>
                     ))}
                 </div>
             ) : filteredDocs.length === 0 ? (
-                <div className="glass-panel rounded-[3rem] border-dashed border-white/10 py-32 text-center group">
-                    <div className="w-24 h-24 bg-slate-900/50 rounded-full flex items-center justify-center mx-auto mb-8 text-slate-700 ring-1 ring-white/5 shadow-inner transition-all group-hover:scale-110">
-                        <FileText size={48} />
+                <div className="glass-panel rounded-3xl border-dashed border-white/10 py-24 text-center group">
+                    <div className="w-20 h-20 bg-slate-900 rounded-2xl flex items-center justify-center mx-auto mb-6 text-slate-700 border border-white/5 shadow-inner transition-all group-hover:scale-110">
+                        <FileText size={32} />
                     </div>
-                    <h3 className="text-2xl font-bold text-white mb-3">Void Detected</h3>
-                    <p className="text-slate-500 max-w-sm mx-auto font-medium">Embed neural data by uploading PDF, Word, or Text files to initialize the retrieval model.</p>
+                    <h3 className="text-xl font-bold text-white mb-2 tracking-tight italic">No documents found</h3>
+                    <p className="text-slate-500 max-w-xs mx-auto text-sm font-medium leading-relaxed">Upload PDF, Word, or Text files to start training your assistant on your own data.</p>
                 </div>
             ) : (
-                <>
-                    {/* Desktop Table View */}
-                    <div className="hidden lg:block glass-panel rounded-[2.5rem] shadow-2xl overflow-hidden border-white/5">
+                <div className="glass-panel rounded-3xl shadow-xl overflow-hidden border-white/5">
+                    <div className="overflow-x-auto">
                         <table className="w-full text-left">
-                            <thead className="bg-slate-900/40 border-b border-white/5 text-slate-500 uppercase tracking-[0.3em] font-black italic">
+                            <thead className="bg-slate-900/40 border-b border-white/5 text-slate-500 uppercase tracking-wider font-bold">
                                 <tr>
-                                    <th className="px-10 py-6 text-[10px]">Data Node</th>
-                                    <th className="px-10 py-6 text-[10px] text-center">Payload</th>
-                                    <th className="px-10 py-6 text-[10px] text-center">Synapses</th>
-                                    <th className="px-10 py-6 text-[10px]">Status</th>
-                                    <th className="px-10 py-6 text-[10px] text-right">Access</th>
+                                    <th className="px-8 py-5 text-[10px]">Document Name</th>
+                                    <th className="px-8 py-5 text-[10px] text-center">Format</th>
+                                    <th className="px-8 py-5 text-[10px] text-center">Sections</th>
+                                    <th className="px-8 py-5 text-[10px]">Status</th>
+                                    <th className="px-8 py-5 text-[10px] text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-white/5">
                                 {filteredDocs.map((doc) => (
                                     <tr key={doc.id} className="hover:bg-white/[0.02] transition-colors group">
-                                        <td className="px-10 py-7">
-                                            <div className="flex items-center space-x-6">
-                                                <div className="w-14 h-14 bg-primary-600/10 text-primary-400 rounded-2xl flex items-center justify-center ring-1 ring-primary-500/10 shadow-inner group-hover:bg-primary-600 group-hover:text-white transition-all">
-                                                    <FileText size={24} />
+                                        <td className="px-8 py-6">
+                                            <div className="flex items-center space-x-4">
+                                                <div className="w-10 h-10 bg-primary-600/10 text-primary-400 rounded-xl flex items-center justify-center border border-primary-500/10 group-hover:bg-primary-600 group-hover:text-white transition-all">
+                                                    <FileText size={18} />
                                                 </div>
                                                 <div className="min-w-0">
-                                                    <p className="text-base font-bold text-white truncate max-w-md tracking-tight italic">{doc.title}</p>
-                                                    <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.1em] mt-1">
-                                                        Added {format(new Date(doc.created_at), 'MMM dd, h:mm a')}
+                                                    <p className="text-sm font-bold text-white truncate max-w-md tracking-tight">{doc.title}</p>
+                                                    <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider mt-0.5">
+                                                        Added {format(new Date(doc.created_at), 'MMM dd, yyyy')}
                                                     </p>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="px-10 py-7 text-sm font-bold text-slate-400 text-center tracking-wider">
-                                            {(doc.file_size / 1024 / 1024).toFixed(2)} MB
+                                        <td className="px-8 py-6 text-[11px] font-bold text-slate-400 text-center uppercase tracking-widest">
+                                            {doc.file_type}
                                         </td>
-                                        <td className="px-10 py-7 text-sm font-bold text-slate-400 text-center font-mono tracking-tighter">
+                                        <td className="px-8 py-6 text-sm font-bold text-slate-400 text-center font-mono">
                                             {doc.chunk_count || '--'}
                                         </td>
-                                        <td className="px-10 py-7">
+                                        <td className="px-8 py-6">
                                             {getStatusBadge(doc.status)}
                                         </td>
-                                        <td className="px-10 py-7 text-right">
-                                            <div className="flex items-center justify-end space-x-2">
+                                        <td className="px-8 py-6 text-right">
+                                            <div className="flex items-center justify-end space-x-1">
                                                 {doc.status === 'failed' && (
-                                                    <button onClick={() => handleReprocess(doc.id)} className="w-10 h-10 flex items-center justify-center text-primary-400 hover:bg-slate-800 rounded-xl transition-all" title="Reprocess">
-                                                        <RefreshCw size={18} />
+                                                    <button onClick={() => handleReprocess(doc.id)} className="p-2 text-primary-400 hover:bg-primary-500/10 rounded-lg transition-all" title="Retry">
+                                                        <RefreshCw size={16} />
                                                     </button>
                                                 )}
-                                                <button onClick={() => window.open(doc.file, '_blank')} className="w-10 h-10 flex items-center justify-center text-slate-500 hover:text-white hover:bg-slate-800 rounded-xl transition-all" title="Review Base Data">
-                                                    <Eye size={18} />
+                                                <button onClick={() => window.open(doc.file, '_blank')} className="p-2 text-slate-500 hover:text-white hover:bg-slate-800 rounded-lg transition-all" title="View">
+                                                    <Eye size={16} />
                                                 </button>
-                                                <button onClick={() => handleDelete(doc.id)} className="w-10 h-10 flex items-center justify-center text-slate-600 hover:text-red-400 hover:bg-red-400/10 rounded-xl transition-all" title="Purge Node">
-                                                    <Trash2 size={18} />
+                                                <button onClick={() => handleDelete(doc.id)} className="p-2 text-slate-500 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all" title="Delete">
+                                                    <Trash2 size={16} />
                                                 </button>
                                             </div>
                                         </td>
@@ -209,51 +207,11 @@ const Documents = () => {
                             </tbody>
                         </table>
                     </div>
-
-                    {/* Mobile/Tablet Card View */}
-                    <div className="lg:hidden grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {filteredDocs.map((doc) => (
-                            <div key={doc.id} className="glass-panel p-8 rounded-[2.5rem] relative overflow-hidden group">
-                                <div className="flex items-start justify-between mb-6">
-                                    <div className="flex items-center space-x-4">
-                                        <div className="w-12 h-12 bg-primary-600/10 text-primary-400 rounded-xl flex items-center justify-center ring-1 ring-primary-500/10">
-                                            <FileText size={24} />
-                                        </div>
-                                        <div className="min-w-0">
-                                            <h4 className="text-base font-bold text-white truncate max-w-[150px] tracking-tight italic">{doc.title}</h4>
-                                            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">{doc.file_type}</p>
-                                        </div>
-                                    </div>
-                                    {getStatusBadge(doc.status)}
-                                </div>
-                                <div className="flex justify-between text-[11px] font-bold py-5 border-y border-white/5 px-2">
-                                    <div className="text-slate-500 uppercase tracking-widest">
-                                        Payload: <span className="text-slate-200">{(doc.file_size / 1024).toFixed(1)} KB</span>
-                                    </div>
-                                    <div className="text-slate-500 uppercase tracking-widest">
-                                        Synapses: <span className="text-slate-200 font-mono italic">{doc.chunk_count || 0}</span>
-                                    </div>
-                                </div>
-                                <div className="flex items-center justify-between pt-6">
-                                    <span className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] italic">
-                                        {format(new Date(doc.created_at), 'MMM dd, yyyy')}
-                                    </span>
-                                    <div className="flex space-x-3">
-                                        <button onClick={() => window.open(doc.file, '_blank')} className="w-10 h-10 flex items-center justify-center bg-slate-800 text-slate-300 rounded-xl hover:bg-white/10 transition-all">
-                                             <Eye size={18} />
-                                        </button>
-                                        <button onClick={() => handleDelete(doc.id)} className="w-10 h-10 flex items-center justify-center bg-red-950/20 text-red-500 rounded-xl border border-red-900/30 hover:bg-red-500 hover:text-white transition-all">
-                                             <Trash2 size={18} />
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </>
+                </div>
             )}
         </div>
     );
 };
+
 
 export default Documents;
