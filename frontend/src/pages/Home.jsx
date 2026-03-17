@@ -8,7 +8,12 @@ import MessageList from '../components/chat/MessageList';
 import ChatInput from '../components/chat/ChatInput';
 import ContextPanel from '../components/chat/ContextPanel';
 
+import { useSearchParams } from 'react-router-dom';
+
 const Chat = () => {
+  const [searchParams] = useSearchParams();
+  const conversationIdFromUrl = searchParams.get('id');
+
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -38,7 +43,9 @@ const Chat = () => {
       const convs = convsRes.results || [];
       setConversations(convs);
 
-      if (convs.length > 0) {
+      if (conversationIdFromUrl) {
+        loadConversation(conversationIdFromUrl);
+      } else if (convs.length > 0) {
         loadConversation(convs[0].id);
       } else {
         createNewConversation();

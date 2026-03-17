@@ -194,7 +194,7 @@ const Documents = () => {
                                                         <RefreshCw size={16} />
                                                     </button>
                                                 )}
-                                                <button onClick={() => window.open(doc.file, '_blank')} className="p-2 text-slate-500 hover:text-white hover:bg-slate-800 rounded-lg transition-all" title="View">
+                                                <button onClick={() => window.open(doc.file_url, '_blank')} className="p-2 text-slate-500 hover:text-white hover:bg-slate-800 rounded-lg transition-all" title="View">
                                                     <Eye size={16} />
                                                 </button>
                                                 <button onClick={() => handleDelete(doc.id)} className="p-2 text-slate-500 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all" title="Delete">

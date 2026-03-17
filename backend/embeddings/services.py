@@ -29,7 +29,7 @@ class EmbeddingService:
         if self._model is None:
             try:
                 from sentence_transformers import SentenceTransformer
-                self._model = SentenceTransformer(self.model_name)
+                self._model = SentenceTransformer(self.model_name, device='cpu')
                 logger.info(f"Loaded embedding model: {self.model_name}")
             except ImportError:
                 logger.error("sentence-transformers not installed")

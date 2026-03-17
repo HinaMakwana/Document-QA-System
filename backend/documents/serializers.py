@@ -22,6 +22,7 @@ class DocumentListSerializer(serializers.ModelSerializer):
     """Serializer for document list view."""
 
     file_size_mb = serializers.ReadOnlyField()
+    file_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Document
@@ -29,8 +30,17 @@ class DocumentListSerializer(serializers.ModelSerializer):
             'id', 'title', 'description', 'file_type',
             'file_size', 'file_size_mb', 'status', 'status_message',
             'page_count', 'word_count', 'chunk_count',
-            'created_at', 'updated_at'
+            'created_at', 'updated_at', 'file_url'
         ]
+
+    def get_file_url(self, obj):
+        if not obj.file:
+            return None
+        file = obj.file
+        # If it's already an absolute URL (like Cloudinary), return it directly
+        if file is not None:
+            file = f"https://res.cloudinary.com/cloudfree/raw/upload/v1/{file}"
+        return file
 
 
 class DocumentDetailSerializer(serializers.ModelSerializer):

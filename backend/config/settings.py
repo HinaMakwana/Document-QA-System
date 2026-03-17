@@ -141,6 +141,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # REST Framework
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
+        'accounts.authentication.APIKeyAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ],
@@ -277,6 +278,23 @@ LOGGING = {
 
 # Create logs directory
 (BASE_DIR / 'logs').mkdir(exist_ok=True)
+
+# Swagger / drf-yasg Configuration
+SWAGGER_SETTINGS = {
+    'USE_SESSION_AUTH': False,
+    'SECURITY_DEFINITIONS': {
+        'API Key': {
+            'type': 'apiKey',
+            'name': 'X-API-Key',
+            'in': 'header',
+            'description': 'API key for programmatic access. '
+                           'Generate one from Settings → API Access Keys.',
+        },
+    },
+    'SECURITY_REQUIREMENTS': [
+        {'API Key': []},
+    ],
+}
 
 # Sentry Integration (Optional)
 SENTRY_DSN = config('SENTRY_DSN', default='')

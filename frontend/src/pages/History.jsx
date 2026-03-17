@@ -77,7 +77,7 @@ const History = () => {
                     filteredConvs.map((conv) => (
                         <div
                             key={conv.id}
-                            onClick={() => navigate('/')}
+                            onClick={() => navigate(`/?id=${conv.id}`)}
                             className="glass-panel p-6 rounded-2xl hover:bg-white/[0.03] transition-all cursor-pointer group shadow-lg border-white/5 relative overflow-hidden"
                         >
                             <div className="flex items-center justify-between relative z-10">
