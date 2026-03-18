@@ -1,11 +1,52 @@
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import React from 'react';
-import { Brain, FileText, AlertCircle, ChevronRight } from 'lucide-react';
+import { Brain, FileText, AlertCircle, ChevronRight, Upload, CheckCircle2 } from 'lucide-react';
 import { format } from 'date-fns';
 
 const MessageItem = ({ message }) => {
   const isAssistant = message.role === 'assistant';
+  const isSystem = message.role === 'system';
+
+  // System messages (upload notifications)
+  if (isSystem) {
+    const isError = message.type === 'upload_failed';
+    const isReady = message.type === 'upload_ready';
+    const isWarning = message.type === 'upload_warning';
+
+    return (
+      <div className="flex w-full mb-3 justify-center animate-fade-in">
+        <div className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-medium max-w-[90%] ${
+          isError
+            ? 'bg-red-500/5 border border-red-500/10 text-red-400'
+            : isReady
+            ? 'bg-emerald-500/5 border border-emerald-500/10 text-emerald-400'
+            : isWarning
+            ? 'bg-amber-500/5 border border-amber-500/10 text-amber-400'
+            : 'bg-primary-500/5 border border-primary-500/10 text-primary-400'
+        }`}>
+          {isError ? (
+            <AlertCircle size={14} className="flex-shrink-0" />
+          ) : isReady ? (
+            <CheckCircle2 size={14} className="flex-shrink-0" />
+          ) : (
+            <Upload size={14} className="flex-shrink-0" />
+          )}
+          <span>
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={{
+                p: ({node, ...props}) => <span {...props} />,
+                strong: ({node, ...props}) => <strong className="font-semibold" {...props} />,
+              }}
+            >
+              {message.content}
+            </ReactMarkdown>
+          </span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`flex w-full mb-6 ${isAssistant ? 'justify-start' : 'justify-end animate-fade-in'}`}>
@@ -91,3 +132,4 @@ const MessageItem = ({ message }) => {
 };
 
 export default MessageItem;
+

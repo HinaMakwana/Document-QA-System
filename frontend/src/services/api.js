@@ -129,6 +129,17 @@ export const documentApi = {
   get: (id) => api.get(`/documents/${id}/`),
   delete: (id) => api.delete(`/documents/${id}/`),
   reprocess: (id) => api.post(`/documents/${id}/reprocess/`),
+  getStatus: (id) => api.get(`/documents/${id}/status/`),
+  chatUpload: (file, conversationId, title) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('conversation_id', conversationId);
+    if (title) formData.append('title', title);
+    return api.post('/documents/chat-upload/', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
+  getUploadQuota: () => api.get('/documents/upload-quota/'),
 };
 
 export const conversationApi = {

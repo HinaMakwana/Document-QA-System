@@ -223,6 +223,7 @@ MAX_UPLOAD_SIZE_MB = config('MAX_UPLOAD_SIZE_MB', default=10, cast=int)
 DATA_UPLOAD_MAX_MEMORY_SIZE = MAX_UPLOAD_SIZE_MB * 1024 * 1024
 FILE_UPLOAD_MAX_MEMORY_SIZE = MAX_UPLOAD_SIZE_MB * 1024 * 1024
 ALLOWED_FILE_TYPES = ['pdf', 'docx', 'doc', 'txt']
+DAILY_UPLOAD_LIMIT = config('DAILY_UPLOAD_LIMIT', default=4, cast=int)
 
 # Token and Cost Limits
 MAX_TOKENS_PER_REQUEST = config('MAX_TOKENS_PER_REQUEST', default=4096, cast=int)

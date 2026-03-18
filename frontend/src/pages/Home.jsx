@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Sparkles, FileText, Info } from 'lucide-react';
 import { conversationApi, documentApi } from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -25,6 +25,11 @@ const Chat = () => {
   const [showDocs, setShowDocs] = useState(false);
   const [streamingMessage, setStreamingMessage] = useState('');
 
+  // File upload state
+  const [pendingFiles, setPendingFiles] = useState([]);
+  const [uploadingFiles, setUploadingFiles] = useState([]);
+  const [uploadQuota, setUploadQuota] = useState(null);
+
   const { user } = useAuth();
 
   useEffect(() => {
@@ -43,6 +48,9 @@ const Chat = () => {
       const convs = convsRes.results || [];
       setConversations(convs);
 
+      // Fetch upload quota
+      fetchQuota();
+
       if (conversationIdFromUrl) {
         loadConversation(conversationIdFromUrl);
       } else if (convs.length > 0) {
@@ -54,6 +62,15 @@ const Chat = () => {
       console.error("Error fetching initial data", error);
     } finally {
       setConvLoading(false);
+    }
+  };
+
+  const fetchQuota = async () => {
+    try {
+      const res = await documentApi.getUploadQuota();
+      setUploadQuota(res);
+    } catch (error) {
+      console.error("Error fetching upload quota", error);
     }
   };
 
@@ -83,11 +100,205 @@ const Chat = () => {
       setCurrentConversation(detailRes);
       setMessages(msgsRes.results || []);
       setSelectedDocs(detailRes.document_ids || []);
+      // Clear pending files when switching conversations
+      setPendingFiles([]);
+      setUploadingFiles([]);
     } catch (error) {
       console.error("Error loading conversation", error);
     } finally {
       setConvLoading(false);
     }
+  };
+
+  // Poll document status until completed or failed
+  const pollDocumentStatus = useCallback(async (docId, fileName) => {
+    const maxAttempts = 60; // ~2 minutes
+    let attempts = 0;
+
+    const poll = async () => {
+      if (attempts >= maxAttempts) {
+        setUploadingFiles(prev =>
+          prev.map(f => f.docId === docId ? { ...f, status: 'failed', error: 'Timeout' } : f)
+        );
+        return;
+      }
+
+      try {
+        const res = await documentApi.getStatus(docId);
+        const docStatus = res.status || res?.data?.status;
+
+        if (docStatus === 'completed') {
+          setUploadingFiles(prev =>
+            prev.map(f => f.docId === docId ? { ...f, status: 'ready' } : f)
+          );
+
+          // Add system message
+          setMessages(prev => [...prev, {
+            role: 'system',
+            content: `📄 **${fileName}** is ready! You can now ask questions about this document.`,
+            created_at: new Date().toISOString(),
+            type: 'upload_ready',
+          }]);
+
+          // Refresh document list
+          try {
+            const docsRes = await documentApi.list();
+            setDocuments(docsRes.results || []);
+          } catch (e) { /* silent */ }
+
+          // Refresh quota
+          fetchQuota();
+
+          // Clean up the file chip after a delay
+          setTimeout(() => {
+            setPendingFiles(prev => prev.filter(f => f.name !== fileName));
+            setUploadingFiles(prev => prev.filter(f => f.docId !== docId));
+          }, 3000);
+
+          return;
+        } else if (docStatus === 'failed') {
+          setUploadingFiles(prev =>
+            prev.map(f => f.docId === docId ? { ...f, status: 'failed', error: 'Processing failed' } : f)
+          );
+
+          // Clean up after delay
+          setTimeout(() => {
+            setPendingFiles(prev => prev.filter(f => f.name !== fileName));
+            setUploadingFiles(prev => prev.filter(f => f.docId !== docId));
+          }, 5000);
+
+          return;
+        }
+
+        // Still processing — poll again
+        attempts++;
+        setTimeout(poll, 2000);
+      } catch (error) {
+        attempts++;
+        setTimeout(poll, 3000);
+      }
+    };
+
+    poll();
+  }, []);
+
+  const handleFilesSelected = (files) => {
+    if (!currentConversation) return;
+    if (!uploadQuota || uploadQuota.remaining <= 0) return;
+
+    // Limit files to remaining quota
+    const allowedCount = Math.min(files.length, uploadQuota.remaining);
+    const allowedFiles = files.slice(0, allowedCount);
+
+    if (allowedCount < files.length) {
+      setMessages(prev => [...prev, {
+        role: 'system',
+        content: `⚠️ Only ${allowedCount} of ${files.length} files accepted. Daily upload limit: ${uploadQuota.daily_limit}/day.`,
+        created_at: new Date().toISOString(),
+        type: 'upload_warning',
+      }]);
+    }
+
+    // Add files to pending
+    setPendingFiles(prev => [...prev, ...allowedFiles]);
+
+    // Start uploading each file
+    allowedFiles.forEach(file => uploadFile(file));
+  };
+
+  const uploadFile = async (file) => {
+    if (!currentConversation) return;
+
+    // Set uploading state
+    setUploadingFiles(prev => [
+      ...prev,
+      { name: file.name, status: 'uploading', docId: null, error: null }
+    ]);
+
+    // Add system message for upload start
+    setMessages(prev => [...prev, {
+      role: 'system',
+      content: `📤 Uploading **${file.name}**...`,
+      created_at: new Date().toISOString(),
+      type: 'upload_start',
+    }]);
+
+    try {
+      const res = await documentApi.chatUpload(file, currentConversation.id, file.name);
+
+      const docId = res?.id || res?.data?.id;
+      const docQuota = res?.quota || res?.data?.quota;
+
+      if (!docId) throw new Error('No document ID returned');
+
+      // Update uploading state to processing
+      setUploadingFiles(prev =>
+        prev.map(f => f.name === file.name ? { ...f, status: 'processing', docId } : f)
+      );
+
+      // Auto-add to selected docs
+      setSelectedDocs(prev => {
+        if (prev.includes(docId)) return prev;
+        return [...prev, docId];
+      });
+
+      // Update quota from response
+      if (docQuota) {
+        setUploadQuota(docQuota);
+      }
+
+      // Update system message to processing
+      setMessages(prev => {
+        // Replace the last upload_start message for this file
+        const newMessages = [...prev];
+        for (let i = newMessages.length - 1; i >= 0; i--) {
+          if (newMessages[i].type === 'upload_start' && newMessages[i].content.includes(file.name)) {
+            newMessages[i] = {
+              ...newMessages[i],
+              content: `⏳ **${file.name}** is being processed...`,
+              type: 'upload_processing',
+            };
+            break;
+          }
+        }
+        return newMessages;
+      });
+
+      // Start polling for processing status
+      pollDocumentStatus(docId, file.name);
+
+    } catch (error) {
+      console.error("Upload error", error);
+
+      const errorMsg = error.response?.data?.error?.message
+        || error.response?.data?.message
+        || error.message
+        || 'Upload failed';
+
+      setUploadingFiles(prev =>
+        prev.map(f => f.name === file.name ? { ...f, status: 'failed', error: errorMsg } : f)
+      );
+
+      setMessages(prev => [...prev, {
+        role: 'system',
+        content: `❌ Failed to upload **${file.name}**: ${errorMsg}`,
+        created_at: new Date().toISOString(),
+        type: 'upload_failed',
+      }]);
+
+      // Clean up after delay
+      setTimeout(() => {
+        setPendingFiles(prev => prev.filter(f => f.name !== file.name));
+        setUploadingFiles(prev => prev.filter(f => f.name !== file.name));
+      }, 5000);
+
+      // Refresh quota
+      fetchQuota();
+    }
+  };
+
+  const handleRemoveFile = (index) => {
+    setPendingFiles(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleSend = async (e) => {
@@ -151,15 +362,11 @@ const Chat = () => {
 
   const handleQuickPrompt = (prompt) => {
     setInput(prompt);
-    // Use a small delay to ensure input state is updated before handleSend reads it
-    // Or better, just call handleSend with the prompt directly
     setTimeout(() => {
         const fakeEvent = { preventDefault: () => {} };
-        // This is a bit hacky, better to refactor handleSend to take content
     }, 0);
   };
 
-  // Improved handleQuickPrompt to be cleaner
   const sendQuickPrompt = async (prompt) => {
     if (!currentConversation || loading) return;
     
@@ -303,6 +510,11 @@ const Chat = () => {
             onToggleDocs={() => setShowDocs(!showDocs)}
             showDocs={showDocs}
             selectedDocsCount={selectedDocs.length}
+            pendingFiles={pendingFiles}
+            onFilesSelected={handleFilesSelected}
+            onRemoveFile={handleRemoveFile}
+            uploadingFiles={uploadingFiles}
+            uploadQuota={uploadQuota}
         />
       </div>
     </div>
