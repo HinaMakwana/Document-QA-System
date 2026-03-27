@@ -44,6 +44,7 @@ python-dotenv>=1.0.0
 python-decouple>=3.8
 whitenoise>=6.6.0
 gunicorn>=21.2.0
+uvicorn[standard]>=0.24.0
 cloudinary>=1.38.0
 django-cloudinary-storage>=0.3.0
 

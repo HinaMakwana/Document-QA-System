@@ -7,6 +7,9 @@ from pathlib import Path
 
 from decouple import Csv, config
 
+# Deployment mode flag — when True, tasks run synchronously (no Celery worker needed)
+USE_SYNC_TASKS = config('USE_SYNC_TASKS', default=False, cast=bool)
+
 # Build paths inside the project
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -14,6 +17,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-dev-key-change-in-production')
 DEBUG = config('DEBUG', default=True, cast=bool)
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=Csv())
+
+# Production security — trust Render's proxy for HTTPS
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+if not DEBUG:
+    SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', default=True, cast=bool)
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 
 # Application definition
 INSTALLED_APPS = [
@@ -80,14 +90,23 @@ WSGI_APPLICATION = 'config.wsgi.application'
 ASGI_APPLICATION = 'config.asgi.application'
 
 # Channel Layers for WebSocket
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            'hosts': [config('REDIS_URL', default='redis://localhost:6379/0')],
+_redis_url = config('REDIS_URL', default='')
+if _redis_url:
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels_redis.core.RedisChannelLayer',
+            'CONFIG': {
+                'hosts': [_redis_url],
+            },
         },
-    },
-}
+    }
+else:
+    # Fallback to in-memory channel layer (development / no Redis)
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels.layers.InMemoryChannelLayer',
+        },
+    }
 
 # Database - Use SQLite for development, PostgreSQL for production
 import dj_database_url
@@ -119,7 +138,8 @@ USE_TZ = True
 # Static files
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_DIRS = [BASE_DIR / 'static']
+_static_dir = BASE_DIR / 'static'
+STATICFILES_DIRS = [_static_dir] if _static_dir.exists() else []
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Media files
@@ -179,24 +199,25 @@ SIMPLE_JWT = {
 
 from corsheaders.defaults import default_headers
 
-# CORS Settings
-CORS_ALLOWED_ORIGINS = [
+# CORS Settings — read additional origins from env for production
+_default_cors = [
     'http://localhost:3000', 'http://127.0.0.1:3000',
     'http://localhost:5173', 'http://127.0.0.1:5173',
     'http://localhost:5174', 'http://127.0.0.1:5174',
     'http://localhost:5175', 'http://127.0.0.1:5175',
 ]
+_extra_cors = config('CORS_ALLOWED_ORIGINS', default='', cast=Csv())
+CORS_ALLOWED_ORIGINS = _default_cors + [o for o in _extra_cors if o and o not in _default_cors]
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = list(default_headers) + [
     'cache-control',
 ]
 
-CSRF_TRUSTED_ORIGINS = [
-    'http://localhost:3000', 'http://127.0.0.1:3000',
-    'http://localhost:5173', 'http://127.0.0.1:5173',
-    'http://localhost:5174', 'http://127.0.0.1:5174',
-    'http://localhost:5175', 'http://127.0.0.1:5175',
-]
+CSRF_TRUSTED_ORIGINS = CORS_ALLOWED_ORIGINS.copy()
+# Also trust the Render backend domain itself
+_render_host = config('RENDER_EXTERNAL_URL', default='')
+if _render_host:
+    CSRF_TRUSTED_ORIGINS.append(_render_host)
 
 # Celery Configuration
 CELERY_BROKER_URL = config('CELERY_BROKER_URL', default='redis://localhost:6379/0')
@@ -209,6 +230,11 @@ CELERY_TIMEZONE = TIME_ZONE
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60  # 30 minutes
+
+# When USE_SYNC_TASKS=True, Celery runs tasks eagerly (in-process, no broker needed)
+if USE_SYNC_TASKS:
+    CELERY_TASK_ALWAYS_EAGER = True
+    CELERY_TASK_EAGER_PROPAGATES = True
 
 GEMINI_API_KEY = config('GEMINI_API_KEY', default='')
 GEMINI_MODEL = config('GEMINI_MODEL', default='gemini-flash-latest')
@@ -233,7 +259,12 @@ MAX_TOKENS_PER_DAY = config('MAX_TOKENS_PER_DAY', default=100000, cast=int)
 DEFAULT_RATE_LIMIT = config('DEFAULT_RATE_LIMIT', default='100/hour')
 PREMIUM_RATE_LIMIT = config('PREMIUM_RATE_LIMIT', default='1000/hour')
 
-# Logging
+# Logging — use console-only in production (containers), file logging in dev
+_log_handlers = ['console']
+if DEBUG:
+    (BASE_DIR / 'logs').mkdir(exist_ok=True)
+    _log_handlers.append('file')
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -248,37 +279,36 @@ LOGGING = {
         },
     },
     'handlers': {
-        'file': {
-            'level': 'INFO',
-            'class': 'logging.FileHandler',
-            'filename': BASE_DIR / 'logs' / 'django.log',
-            'formatter': 'verbose',
-        },
         'console': {
             'class': 'logging.StreamHandler',
-            'formatter': 'simple',
+            'formatter': 'verbose' if not DEBUG else 'simple',
         },
+        **({
+            'file': {
+                'level': 'INFO',
+                'class': 'logging.FileHandler',
+                'filename': BASE_DIR / 'logs' / 'django.log',
+                'formatter': 'verbose',
+            },
+        } if DEBUG else {}),
     },
     'root': {
-        'handlers': ['console', 'file'],
+        'handlers': _log_handlers,
         'level': 'INFO',
     },
     'loggers': {
         'django': {
-            'handlers': ['console', 'file'],
+            'handlers': _log_handlers,
             'level': 'INFO',
             'propagate': False,
         },
         'ai_doc': {
-            'handlers': ['console', 'file'],
-            'level': 'DEBUG',
+            'handlers': _log_handlers,
+            'level': 'DEBUG' if DEBUG else 'INFO',
             'propagate': False,
         },
     },
 }
-
-# Create logs directory
-(BASE_DIR / 'logs').mkdir(exist_ok=True)
 
 # Swagger / drf-yasg Configuration
 SWAGGER_SETTINGS = {

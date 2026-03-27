@@ -1,0 +1,89 @@
+# Render Blueprint — Infrastructure as Code
+# Docs: https://render.com/docs/blueprint-spec
+# This file auto-provisions all services when you connect your repo to Render.
+
+services:
+  # ── Django Backend (Web Service) ──────────────────────────────────────
+  - type: web
+    name: docqa-backend
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /api/v1/health/
+    envVars:
+      # Django
+      - key: DEBUG
+        value: "False"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com"
+      - key: ENVIRONMENT
+        value: production
+
+      # Database (auto-populated from the database below)
+      - key: DATABASE_URL
+        fromDatabase:
+          name: docqa-db
+          property: connectionString
+
+      # Redis (auto-populated from redis below)
+      - key: REDIS_URL
+        fromService:
+          name: docqa-redis
+          type: redis
+          property: connectionString
+      - key: CELERY_BROKER_URL
+        fromService:
+          name: docqa-redis
+          type: redis
+          property: connectionString
+
+      # AI & Embeddings — set these manually in Render dashboard
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-flash-latest
+      - key: EMBEDDING_MODEL
+        value: all-MiniLM-L6-v2
+
+      # Cloudinary — set these manually in Render dashboard
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+
+      # CORS — update after frontend deployment
+      - key: CORS_ALLOWED_ORIGINS
+        value: "https://your-app.vercel.app"
+
+      # ChromaDB
+      - key: CHROMA_PERSIST_DIRECTORY
+        value: /app/chroma_db
+
+      # Workers (keep low for free tier's 512MB RAM)
+      - key: GUNICORN_WORKERS
+        value: "2"
+
+      # Use synchronous task processing (no separate worker needed)
+      - key: USE_SYNC_TASKS
+        value: "true"
+
+# ── PostgreSQL Database ───────────────────────────────────────────────
+databases:
+  - name: docqa-db
+    plan: free
+    region: oregon
+    databaseName: docqa_db
+    user: docqa_user
+
+# ── Redis ─────────────────────────────────────────────────────────────
+redis:
+  - name: docqa-redis
+    plan: free
+    region: oregon
+    maxmemoryPolicy: allkeys-lru
