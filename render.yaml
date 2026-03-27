@@ -11,7 +11,7 @@ services:
     region: oregon
     dockerfilePath: ./backend/Dockerfile
     dockerContext: ./backend
-    healthCheckPath: /api/v1/health/
+    healthCheckPath: /health/
     envVars:
       # Django
       - key: DEBUG
@@ -55,7 +55,7 @@ services:
 
       # Workers (keep low for free tier's 512MB RAM)
       - key: GUNICORN_WORKERS
-        value: "2"
+        value: "1"
 
       # Use synchronous task processing (no separate worker needed)
       - key: USE_SYNC_TASKS
