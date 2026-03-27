@@ -29,18 +29,6 @@ services:
           name: docqa-db
           property: connectionString
 
-      # Redis (auto-populated from redis below)
-      - key: REDIS_URL
-        fromService:
-          name: docqa-redis
-          type: redis
-          property: connectionString
-      - key: CELERY_BROKER_URL
-        fromService:
-          name: docqa-redis
-          type: redis
-          property: connectionString
-
       # AI & Embeddings — set these manually in Render dashboard
       - key: GEMINI_API_KEY
         sync: false
@@ -80,10 +68,3 @@ databases:
     region: oregon
     databaseName: docqa_db
     user: docqa_user
-
-# ── Redis ─────────────────────────────────────────────────────────────
-redis:
-  - name: docqa-redis
-    plan: free
-    region: oregon
-    maxmemoryPolicy: allkeys-lru
