@@ -205,6 +205,7 @@ _default_cors = [
     'http://localhost:5173', 'http://127.0.0.1:5173',
     'http://localhost:5174', 'http://127.0.0.1:5174',
     'http://localhost:5175', 'http://127.0.0.1:5175',
+    'https://document-qa-system-teal.vercel.app', 'https://document-qa-system-teal.vercel.app',
 ]
 _extra_cors = config('CORS_ALLOWED_ORIGINS', default='', cast=Csv())
 CORS_ALLOWED_ORIGINS = _default_cors + [o for o in _extra_cors if o and o not in _default_cors]
