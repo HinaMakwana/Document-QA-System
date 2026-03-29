@@ -38,7 +38,7 @@ urlpatterns = [
     path('api/v1/analytics/', include('analytics.urls')),
 
     # Health Check
-    path('health/', include('config.health_urls')),
+    path('api/v1/health/', include('config.health_urls')),
 ]
 
 if settings.DEBUG:
