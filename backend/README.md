@@ -10,7 +10,6 @@ An intelligent document Q&A system that allows users to upload documents and ask
 - **Citations**: See which document sections were used for answers
 - **Conversation History**: Track and manage conversation threads
 - **Usage Analytics**: Monitor token usage and API calls
-- **Real-time Chat**: WebSocket support for streaming responses
 
 ## Tech Stack
 
@@ -29,7 +28,7 @@ An intelligent document Q&A system that allows users to upload documents and ask
 ```bash
 cd ai-doc
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate
 pip install -r requirements.txt
 ```
 
@@ -95,7 +94,7 @@ python manage.py runserver
 - **Web Interface**: http://localhost:8000
 - **Admin Panel**: http://localhost:8000/admin
 - **API Documentation**: http://localhost:8000/swagger
-- **Health Check**: http://localhost:8000/health
+- **Health Check**: http://localhost:8000/api/v1/health
 
 ## API Endpoints
 
