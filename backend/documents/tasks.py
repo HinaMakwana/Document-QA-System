@@ -29,10 +29,13 @@ def process_document_task(self, document_id: str):
         return {'success': False, 'error': 'Document not found'}
 
     try:
+        # Get celery request ID if available
+        celery_task_id = self.request.id if self and hasattr(self, 'request') else 'threaded'
+        
         # Update status to processing
         document.status = Document.Status.PROCESSING
         document.processing_started_at = timezone.now()
-        document.celery_task_id = self.request.id
+        document.celery_task_id = celery_task_id
         document.save()
 
         logger.info(f"Starting processing for document {document_id}")
@@ -93,8 +96,10 @@ def process_document_task(self, document_id: str):
         document.status_message = f"Processing failed: {str(e)}"
         document.save()
 
-        # Retry on failure
-        raise self.retry(exc=e)
+        # Retry on failure only if celery is available
+        if self and hasattr(self, 'retry'):
+            raise self.retry(exc=e)
+        raise e
 
 
 @shared_task

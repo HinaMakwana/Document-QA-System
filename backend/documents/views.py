@@ -19,6 +19,7 @@ from .serializers import (
     DocumentChunkSerializer,
 )
 from .tasks import process_document_task
+from config.task_utils import run_async_task
 from analytics.services import AnalyticsService
 
 
@@ -83,7 +84,7 @@ class DocumentListCreateView(generics.ListCreateAPIView):
             document = serializer.save()
 
             # Trigger async processing only after the database transaction commits
-            transaction.on_commit(lambda: process_document_task.delay(str(document.id)))
+            transaction.on_commit(lambda: run_async_task(process_document_task, str(document.id)))
 
         # Log analytics outside of transaction
         AnalyticsService().log_usage(
@@ -202,7 +203,7 @@ class DocumentReprocessView(APIView):
             document.save()
 
             # Trigger processing after commit
-            transaction.on_commit(lambda: process_document_task.delay(str(document.id)))
+            transaction.on_commit(lambda: run_async_task(process_document_task, str(document.id)))
 
         return Response({
             'success': True,

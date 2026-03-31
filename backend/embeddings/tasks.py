@@ -102,7 +102,9 @@ def generate_embeddings_task(self, document_id: str):
 
     except Exception as e:
         logger.error(f"Error generating embeddings for document {document_id}: {str(e)}")
-        raise self.retry(exc=e)
+        if self and hasattr(self, 'retry'):
+            raise self.retry(exc=e)
+        raise e
 
 
 @shared_task
