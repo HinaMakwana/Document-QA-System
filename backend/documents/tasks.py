@@ -29,8 +29,10 @@ def process_document_task(self, document_id: str):
         return {'success': False, 'error': 'Document not found'}
 
     try:
-        # Get celery request ID if available
-        celery_task_id = self.request.id if self and hasattr(self, 'request') else 'threaded'
+        # Get celery request ID if available, default to 'threaded' if None
+        celery_task_id = getattr(self.request, 'id', 'threaded') if self else 'threaded'
+        if not celery_task_id:
+            celery_task_id = 'threaded'
         
         # Update status to processing
         document.status = Document.Status.PROCESSING
