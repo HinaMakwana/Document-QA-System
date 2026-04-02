@@ -214,8 +214,17 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
     'cache-control',
 ]
 
+# CSRF Trusted Origins
 CSRF_TRUSTED_ORIGINS = CORS_ALLOWED_ORIGINS.copy()
-# Also trust the Render backend domain itself
+
+# Add Railway domain if present
+_railway_static_url = config('RAILWAY_STATIC_URL', default='')
+if _railway_static_url:
+    # Ensure it starts with https://
+    url = _railway_static_url if _railway_static_url.startswith('http') else f"https://{_railway_static_url}"
+    CSRF_TRUSTED_ORIGINS.append(url)
+
+# Keep Render support for backward compatibility if needed
 _render_host = config('RENDER_EXTERNAL_URL', default='')
 if _render_host:
     CSRF_TRUSTED_ORIGINS.append(_render_host)
