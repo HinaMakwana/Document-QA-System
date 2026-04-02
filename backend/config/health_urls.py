@@ -9,11 +9,8 @@ import time
 
 
 def health_check(request):
-    """Basic health check endpoint."""
-    return JsonResponse({
-        'status': 'healthy',
-        'timestamp': time.time()
-    })
+    """Basic health check endpoint — always returns 200 if server is Up."""
+    return JsonResponse({'status': 'ok'})
 
 
 def ready_check(request):
