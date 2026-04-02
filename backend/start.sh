@@ -17,7 +17,8 @@ if [ -n "$DATABASE_URL" ]; then
 fi
 
 echo "=== Running database migrations ==="
-python manage.py migrate --noinput || echo "Warning: Migration failed, but trying to start app anyway."
+# Hard failure if migrations fail so we can see the exact error in the logs
+python manage.py migrate --noinput
 
 echo "=== Collecting static files ==="
 python manage.py collectstatic --noinput --clear 2>/dev/null || true
