@@ -3,11 +3,16 @@ Vector store and embedding services.
 """
 import logging
 import os
+import threading
+import time
 from typing import List, Dict, Any, Optional
 
 from django.conf import settings
 
 logger = logging.getLogger('ai_doc')
+
+# Global lock for ChromaDB client initialization to prevent race conditions in multi-threaded/async environments
+_chroma_lock = threading.Lock()
 
 
 class EmbeddingService:
@@ -76,26 +81,55 @@ class VectorStoreService:
         self.embedding_service = EmbeddingService()
 
     def _get_client(self):
-        """Get ChromaDB client."""
+        """Get ChromaDB client with thread-safe initialization."""
         if self._client is None:
-            try:
-                import chromadb
-                from chromadb.config import Settings
+            with _chroma_lock:
+                # Double-check after acquiring lock
+                if self._client is not None:
+                    return self._client
+                
+                try:
+                    import chromadb
+                    from chromadb.config import Settings
 
-                # Ensure directory exists
-                os.makedirs(self.persist_directory, exist_ok=True)
+                    # Ensure directory exists
+                    os.makedirs(self.persist_directory, exist_ok=True)
 
-                self._client = chromadb.PersistentClient(
-                    path=self.persist_directory,
-                    settings=Settings(
-                        anonymized_telemetry=False,
-                        allow_reset=True,
-                    )
-                )
-                logger.info(f"ChromaDB client initialized at {self.persist_directory}")
-            except ImportError:
-                logger.error("chromadb not installed")
-                raise ImportError("Please install chromadb: pip install chromadb")
+                    # Use a slightly more robust initialization for PersistentClient
+                    # The KeyError '/app/chroma_db' often happens when multiple threads 
+                    # attempt to register the same path in Chroma's shared client registry.
+                    # We add a small retry loop and explicitly check for the registry issue.
+                    
+                    for attempt in range(3):
+                        try:
+                            self._client = chromadb.PersistentClient(
+                                path=self.persist_directory,
+                                settings=Settings(
+                                    anonymized_telemetry=False,
+                                    allow_reset=True,
+                                    is_persistent=True,
+                                )
+                            )
+                            break
+                        except Exception as e:
+                            if "bindings" in str(e) or attempt == 2:
+                                raise
+                            logger.warning(f"ChromaDB init attempt {attempt+1} failed: {str(e)}. Retrying...")
+                            time.sleep(0.5)
+
+                    logger.info(f"ChromaDB client initialized at {self.persist_directory}")
+                except ImportError:
+                    logger.error("chromadb not installed")
+                    raise ImportError("Please install chromadb: pip install chromadb")
+                except Exception as e:
+                    logger.error(f"Failed to initialize ChromaDB client: {str(e)}")
+                    # Try to get an existing client from ChromaDB's own registry if possible
+                    try:
+                        import chromadb
+                        self._client = chromadb.PersistentClient(path=self.persist_directory)
+                        logger.info("Recovered ChromaDB client from registry")
+                    except:
+                        raise e
         return self._client
 
     def _get_collection(self):

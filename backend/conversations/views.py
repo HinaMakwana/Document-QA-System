@@ -366,21 +366,23 @@ class ChatStreamView(APIView):
 
         message = InputValidator.sanitize_message(message)
 
-        def _sse_stream():
-            """Generator yielding SSE-formatted chunks."""
+        async def _sse_stream():
+            """Async generator yielding SSE-formatted chunks."""
             from .services import LLMService, PromptTemplates
             from embeddings.services import RAGService as EmbeddingRAGService
+            from asgiref.sync import sync_to_async
 
             # Build RAG context
             context = ''
             citations = []
             if include_context:
-                document_ids = list(
+                document_ids = await sync_to_async(list)(
                     conversation.documents.values_list('id', flat=True)
                 )
                 if document_ids:
                     rag = EmbeddingRAGService()
-                    results = rag.retrieve_context(
+                    # sync_to_async for the vector store search
+                    results = await sync_to_async(rag.retrieve_context)(
                         query=message,
                         document_ids=[str(d) for d in document_ids],
                         n_results=5,
@@ -389,13 +391,14 @@ class ChatStreamView(APIView):
                         context = rag.format_context(results)
                         citations = rag.get_citations(results)
 
-            # Build prompt
-            history = conversation.get_conversation_history(limit=10)
+            history = await sync_to_async(conversation.get_conversation_history)(limit=10)
             history_text = '\n'.join(
                 f"{m['role'].capitalize()}: {m['content'][:500]}" for m in history
             )
 
-            document_info = ', '.join([d.title for d in conversation.documents.all()]) or 'None'
+            # Use sync_to_async for Querysets
+            all_docs = await sync_to_async(list)(conversation.documents.all())
+            document_info = ', '.join([d.title for d in all_docs]) or 'None'
 
             if history_text and context:
                 prompt = PromptTemplates.CONVERSATION_PROMPT.format(
@@ -418,46 +421,53 @@ class ChatStreamView(APIView):
 
             # Send SSE chunks
             full_response = ''
-            for chunk in llm.generate_stream(prompt, system_prompt=system_prompt):
+            # LLM generation is sync, wrap the iterator
+            for chunk in await sync_to_async(llm.generate_stream)(prompt, system_prompt=system_prompt):
                 full_response += chunk
                 yield f"data: {json.dumps({'type': 'chunk', 'text': chunk})}\n\n"
 
-            # Save messages after streaming completes
-            try:
-                from django.utils import timezone
-                user_msg = Message.objects.create(
-                    conversation=conversation,
-                    role=Message.Role.USER,
-                    content=message,
-                )
-                estimated_tokens = len(full_response.split()) * 2
-                assistant_msg = Message.objects.create(
-                    conversation=conversation,
-                    role=Message.Role.ASSISTANT,
-                    content=full_response,
-                    tokens_used=estimated_tokens,
-                    model_used=llm.model_name,
-                    citations=citations,
-                )
-                conversation.total_messages += 2
-                conversation.total_tokens_used += estimated_tokens
-                conversation.last_message_at = timezone.now()
-                conversation.save(update_fields=[
-                    'total_messages', 'total_tokens_used', 'last_message_at'
-                ])
-                request.user.add_token_usage(estimated_tokens)
+            # Save messages after streaming completes — wrap in sync_to_async
+            async def _save_metadata():
+                try:
+                    from django.utils import timezone
+                    user_msg = await sync_to_async(Message.objects.create)(
+                        conversation=conversation,
+                        role=Message.Role.USER,
+                        content=message,
+                    )
+                    estimated_tokens = len(full_response.split()) * 2
+                    assistant_msg = await sync_to_async(Message.objects.create)(
+                        conversation=conversation,
+                        role=Message.Role.ASSISTANT,
+                        content=full_response,
+                        tokens_used=estimated_tokens,
+                        model_used=llm.model_name,
+                        citations=citations,
+                    )
+                    conversation.total_messages += 2
+                    conversation.total_tokens_used += estimated_tokens
+                    conversation.last_message_at = timezone.now()
+                    await sync_to_async(conversation.save)(update_fields=[
+                        'total_messages', 'total_tokens_used', 'last_message_at'
+                    ])
+                    # Ensure user token usage is also async-safe if it hits the DB
+                    await sync_to_async(request.user.add_token_usage)(estimated_tokens)
 
-                # Log analytics
-                AnalyticsService().log_usage(
-                    user=request.user,
-                    event_type='chat',
-                    tokens_used=estimated_tokens,
-                    metadata={'conversation_id': str(pk), 'streaming': True},
-                    endpoint=request.path,
-                    ip_address=request.META.get('REMOTE_ADDR'),
-                )
-            except Exception:
-                pass  # Don't break the stream if saving fails
+                    # Log analytics (sync_to_async within AnalyticsService)
+                    await sync_to_async(AnalyticsService().log_usage)(
+                        user=request.user,
+                        event_type='chat',
+                        tokens_used=estimated_tokens,
+                        metadata={'conversation_id': str(pk), 'streaming': True},
+                        endpoint=request.path,
+                        ip_address=request.META.get('REMOTE_ADDR'),
+                    )
+                except Exception as e:
+                    logger.error(f"Error saving stream metadata: {str(e)}")
+
+            # Execute save in background
+            import asyncio
+            asyncio.create_task(_save_metadata())
 
             # Final event with metadata
             yield f"data: {json.dumps({'type': 'done', 'citations': citations})}\n\n"
