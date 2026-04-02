@@ -21,7 +21,7 @@ echo "=== Running database migrations ==="
 python manage.py migrate --noinput
 
 echo "=== Collecting static files ==="
-python manage.py collectstatic --noinput --clear 2>/dev/null || true
+python manage.py collectstatic --noinput
 
 echo "=== Starting Server on Port ${PORT:-8000} ==="
 # Use gunicorn with a generous timeout and ensure it binds to all interfaces
