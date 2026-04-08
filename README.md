@@ -16,7 +16,6 @@ A state-of-the-art intelligent document Q&A system that leverages **Retrieval-Au
 | **Frontend** | Modern React Dashboard | [README](frontend/README.md) |
 | **Documentation** | Architecture & Setup | [Docs Folder](docs/) |
 | **System Status** | Celery & WebSockets | [Implementation Detail](docs/SYSTEM_IMPLEMENTATION.md) |
-| **Demo Guide** | How to record a demo | [Recording Guide](docs/DEMO_GUIDE.md) |
 | **Test Coverage** | Backend coverage metrics | [Coverage Report](docs/TEST_COVERAGE.md) |
 
 ---
