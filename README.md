@@ -24,13 +24,13 @@ A state-of-the-art intelligent document Q&A system that leverages **Retrieval-Au
 ## ⚡ System Core Status
 
 ### 🐎 Celery (Background Tasks)
-- **Status**: ✅ **Implemented & Verified**
+- **Status**: ✅ **Implemented**
 - **Purpose**: Asynchronous document processing and embedding generation.
 - **Key Files**: `backend/config/celery.py`, `backend/embeddings/tasks.py`
 - **Confirmation**: High-latency AI operations (like embedding thousands of tokens) are offloaded to workers to ensure a responsive UI.
 
 ### 🌐 WebSockets (Real-time Communication)
-- **Status**: ✅ **Implemented & Verified**
+- **Status**: ✅ **Implemented**
 - **Purpose**: Real-time chat streaming and typing indicators.
 - **Key Files**: `backend/config/asgi.py`, `backend/conversations/consumers.py`
 - **Confirmation**: Uses Django Channels with Redis as a layer to provide sub-second latency for AI-generated responses.
@@ -43,10 +43,8 @@ A state-of-the-art intelligent document Q&A system that leverages **Retrieval-Au
 > **Watch the full project walkthrough below to see RAG in action!**
 
 *(Placeholder for Demo Video)*
-[![Demo Video](https://img.shields.io/badge/Demo_Video-Coming_Soon-lightgrey?style=for-the-badge&logo=youtube)](https://youtube.com)
+[![Demo Video](https://www.awesomescreenshot.com/video/51084763?key=57a064c255473c4670d15ae2c7277aaf)](https://www.awesomescreenshot.com/video/51084763?key=57a064c255473c4670d15ae2c7277aaf)
 
-> [!NOTE]
-> To record your own demo, start both the backend and frontend servers, upload a sample PDF, and demonstrate the real-time chat functionality.
 
 ---
 
